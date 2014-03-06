@@ -1,0 +1,10 @@
+!!!
+%haml{:lang => "ja"}
+  %head
+    %meta{:charset => "UTF-8"}
+  %body
+    %h1
+      login
+    %form{:method => "get", :action => "http://10.171.191.232:9292/home"}
+      %input{:type => "text", :name => "name", :size => "30"}
+      %input{:type => "submit", :value => "login", :size => "30"}

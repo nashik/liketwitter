@@ -1,0 +1,22 @@
+!!!
+%haml{:lang => "ja"}
+  %head
+    %meta{:charset => "UTF-8"}
+  %body
+    %h1
+      #{@userName}
+    - @twi.each do |text|
+      %h2
+        %p
+          #{text}
+
+    %form{:method => "post", :action => "http://10.171.191.232:9292/tweet"}
+      %input{:type => "text", :name => "tweet", :size => "30"}
+      %input{:type => "submit", :value => "tweet", :size => "30"}
+      %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
+
+    %div{:align => "right"}
+      %a{:href => "http://10.171.191.232:9292/login"}
+        logout
+      %p
+        ver 1.1
