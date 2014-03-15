@@ -1,17 +1,19 @@
 # -*- coding:utf-8 -*-
-
+Encoding.default_external = 'utf-8'
 require 'sinatra'
 require 'redis'
 require 'haml'
 
-class LikeTwitter < Sinatra::Base
-    
+#class LikeTwitter < Sinatra::Base
+    set :environment, :production
+
     set :haml, :escape_html => true
     
     #URLでアクセス
-    get '/login' do
+  get '/login' do
+    
         haml :login
-    end
+  end
     
     #ホーム画面
     get '/home' do
@@ -35,4 +37,4 @@ class LikeTwitter < Sinatra::Base
         #手動リダイレクト
         haml :index
     end
-end
+#end

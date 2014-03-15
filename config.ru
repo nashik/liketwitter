@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 # config.ru
-
 require './app.rb'
 
 Encoding.default_external = 'utf-8'
