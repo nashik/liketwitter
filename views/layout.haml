@@ -1,0 +1,17 @@
+!!!
+%haml{:lang => "ja"}
+  %head
+    %meta{:charset => "UTF-8"}
+    %title LikeTwitter
+    %link(rel='stylesheet' href='css/bootstrap.min.css')
+    %link(rel='stylesheet' href='css/bootstrap-responsive.min.css')
+  %body
+    .container-fluid
+    
+      %div{:style => 'padding-top:60px'}
+      
+      %body
+        !=yield
+               
+    %script{:src => 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'}
+    %script{:src => 'js/bootstrap.min.js'}
