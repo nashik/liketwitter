@@ -1,21 +1,17 @@
+
 %p
   #{@userName}
-.navbar.navbar-fixed-top
-  .navbar-inner
-    .container
-      %form{:method => "post", :action => "/tweet"}
-        %input{:type => "text", :name => "tweet", :size => "30"}
-        %input{:type => "submit", :value => "tweet", :size => "30"}
-        %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
+%form{:class => "well form-inline", :method => "post", :action => "/tweet"}
+  %input{:type => "text", :name => "tweet", :size => "30"}
+  %input{:type => "submit", :value => "tweet", :size => "30"}
+  %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
 
-.row-fluid
-  .span4
-    - @twi.each do |text|
-      %p
-        #{text}
+- @twi.each do |text|
+  %label
+    #{text}
 
-  %div{:align => "right"}
-    %a{:href => "/login"}
-      logout
-    %p
-      ver 1.1
+%div{:align => "right"}
+  %a{:href => "/login"}
+    logout
+  %p
+    ver 1.1

@@ -1,5 +1,4 @@
-%h1
-  login
-%form{:method => "get", :action => "/home"}
-  %input{:type => "text", :name => "name", :size => "30"}
-  %input{:type => "submit", :value => "login", :size => "30"}
+%div{:align => "center"}
+  %form{:class => "well form-inline", :method => "get", :action => "/home"}
+    %input{:type => "text", :class => "input-small", :name => "name", :placeholder => "ID"}
+    %input{:type => "submit", :value => "login"}
