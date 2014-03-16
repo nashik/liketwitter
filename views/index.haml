@@ -1,22 +1,21 @@
-!!!
-%haml{:lang => "ja"}
-  %head
-    %meta{:charset => "UTF-8"}
-  %body
-    %h1
-      #{@userName}
+%p
+  #{@userName}
+.navbar.navbar-fixed-top
+  .navbar-inner
+    .container
+      %form{:method => "post", :action => "/tweet"}
+        %input{:type => "text", :name => "tweet", :size => "30"}
+        %input{:type => "submit", :value => "tweet", :size => "30"}
+        %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
+
+.row-fluid
+  .span4
     - @twi.each do |text|
-      %h2
-        %p
-          #{text}
-
-    %form{:method => "post", :action => "/tweet"}
-      %input{:type => "text", :name => "tweet", :size => "30"}
-      %input{:type => "submit", :value => "tweet", :size => "30"}
-      %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
-
-    %div{:align => "right"}
-      %a{:href => "/login"}
-        logout
       %p
-        ver 1.1
+        #{text}
+
+  %div{:align => "right"}
+    %a{:href => "/login"}
+      logout
+    %p
+      ver 1.1
