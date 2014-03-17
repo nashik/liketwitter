@@ -4,7 +4,7 @@ require 'sinatra'
 require 'redis'
 require 'haml'
 
-#class LikeTwitter < Sinatra::Base
+class LikeTwitter < Sinatra::Base
     set :environment, :production
 
     set :haml, :escape_html => true
@@ -37,4 +37,4 @@ require 'haml'
         #手動リダイレクト
         haml :index
     end
-#end
+end

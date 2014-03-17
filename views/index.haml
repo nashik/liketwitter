@@ -1,4 +1,3 @@
-
 %p
   #{@userName}
 %form{:class => "well form-inline", :method => "post", :action => "/tweet"}
@@ -6,9 +5,14 @@
   %input{:type => "submit", :value => "tweet", :size => "30"}
   %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
 
-- @twi.each do |text|
-  %label
-    #{text}
+%table{:class => "table"}
+  %thead
+    %tr
+      %th
+  %tboby
+    - @twi.each do |text|
+      %tr
+        %td #{text}
 
 %div{:align => "right"}
   %a{:href => "/login"}
