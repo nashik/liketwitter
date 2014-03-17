@@ -5,36 +5,88 @@ require 'redis'
 require 'haml'
 
 class LikeTwitter < Sinatra::Base
-    set :environment, :production
+  
+  LOCAL_HOST = '127.0.0.1'
+  PORT = '6379'
+    
+  #login
+  get '/login_form' do
+    haml :loginform
+  end
+  
+  post '/login_action' do
+    @userName = params[:name]
+    @password = params[:pass]
+    
+    #DBã®ãƒãƒƒã‚·ãƒ¥ã¨æ¯”è¼ƒçš„ãª
+    
+    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+    userId = redis.get("UserName:#{@userName}:UserID")
+    pass = redis.get("UserID:#{userId.to_s}:Password")
+    
+    if pass == @password
+      rand = (("a".."z").to_a + ("A".."Z").to_a + (0..9).to_a).shuffle[0..7].join
+      redis.set("UserID:#{userId.to_s}:Cookie", rand)
+      response.set_cookie "auth", rand
+      
+      @twi = redis.lrange("Posts:#{userId.to_s}", 0, -1)
+      haml :index
+    else
+      redirect to "login_form"
+    end
+  end
 
-    set :haml, :escape_html => true
-    
-    #URL‚ÅƒAƒNƒZƒX
-  get '/login' do
-    
-        haml :login
+  #regist
+  get '/user_regist' do
+    haml :registuserform
   end
     
-    #ƒz[ƒ€‰æ–Ê
-    get '/home' do
-        redis = Redis.new(:host => "127.0.0.1", :port => "6379")
-        @userName = params[:name]
-        @twi = redis.lrange(@userName , 0, -1)
-        
-        haml :index
+  post '/user_regist_action' do
+    @userName = params[:name]
+    @password = params[:pass]
+    
+    #DBã¸ãƒãƒƒã‚·ãƒ¥ã‚’
+    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+    userId = redis.incr("global:NextUserID")
+    redis.set("UserID:#{userId.to_s}:UserName", @userName)
+    redis.set("UserID:#{userId.to_s}:Password", @password)
+    redis.set("UserName:#{@userName}:UserID", userId)
+    
+    redirect to '/login_form'
+  end
+  
+  #ãƒ›ãƒ¼ãƒ ç”»é¢
+  get '/home' do
+    cookie = request.cookies['auth']
+    
+    @userName = params[:name]
+    
+    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+    userId = redis.get("UserName:#{@userName}:UserID")
+    redCookie = redis.get("UserID:#{userId.to_s}:Cookie")
+    
+    if auth != redCookie
+      redirect to "/login_form"
     end
+
+    @twi = redis.lrange("Posts:#{userId.to_s}", 0, -1)
     
-    #ƒcƒC[ƒgƒ|ƒXƒg
-    post '/tweet' do
-        #DB‚Ö
-        redis = Redis.new(:host => "127.0.0.1", :port => "6379")
-        redis.lpush(params[:userName], params[:tweet])
+    haml :index
+  end
     
-        #‚Æ‚è‚ ‚¦‚¸Äæ“¾
-        @userName = params[:userName]
-        @twi = redis.lrange(@userName , 0, -1)
-    
-        #è“®ƒŠƒ_ƒCƒŒƒNƒg
-        haml :index
-    end
+  #ãƒ„ã‚¤ãƒ¼ãƒˆãƒã‚¹ãƒˆ
+  post '/tweet' do
+    #DBã¸
+    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+    userName = params[:userName]
+    userId = redis.get("UserName:#{userName}:UserID")
+    redis.lpush("Posts:#{userId.to_s}", params[:tweet])
+  
+    #ã¨ã‚Šã‚ãˆãšå†å–å¾—
+    @userName = params[:userName]
+    @twi = redis.lrange("Posts:#{userId.to_s}", 0, -1)
+  
+    #æ‰‹å‹•ãƒªãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆ
+    haml :index
+  end
 end
