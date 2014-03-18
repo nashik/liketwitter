@@ -29,10 +29,9 @@ class LikeTwitter < Sinatra::Base
       redis.set("UserID:#{userId.to_s}:Cookie", rand)
       response.set_cookie "auth", rand
       
-      @twi = redis.lrange("Posts:#{userId.to_s}", 0, -1)
-      haml :index
+      redirect to "/home?name=#{@userName}"
     else
-      redirect to "login_form"
+      redirect to "/login_form"
     end
   end
 
@@ -40,7 +39,7 @@ class LikeTwitter < Sinatra::Base
   get '/user_regist' do
     haml :registuserform
   end
-    
+  
   post '/user_regist_action' do
     @userName = params[:name]
     @password = params[:pass]
@@ -65,7 +64,7 @@ class LikeTwitter < Sinatra::Base
     userId = redis.get("UserName:#{@userName}:UserID")
     redCookie = redis.get("UserID:#{userId.to_s}:Cookie")
     
-    if auth != redCookie
+    if cookie != redCookie
       redirect to "/login_form"
     end
 
@@ -78,15 +77,19 @@ class LikeTwitter < Sinatra::Base
   post '/tweet' do
     #DBへ
     redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
-    userName = params[:userName]
-    userId = redis.get("UserName:#{userName}:UserID")
-    redis.lpush("Posts:#{userId.to_s}", params[:tweet])
-  
-    #とりあえず再取得
     @userName = params[:userName]
-    @twi = redis.lrange("Posts:#{userId.to_s}", 0, -1)
-  
-    #手動リダイレクト
-    haml :index
+    userId = redis.get("UserName:#{@userName}:UserID")
+    redis.lpush("Posts:#{userId.to_s}", params[:tweet])
+    
+    redirect to "/home?name=#{@userName}"
   end
+  
+    get '/logout_action' do
+        redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+        rand = (("a".."z").to_a + ("A".."Z").to_a + (0..9).to_a).shuffle[0..7].join
+        response.set_cookie "auth", rand
+        
+        redirect to "/login_form"
+    end
+    
 end
