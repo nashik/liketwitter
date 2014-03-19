@@ -10,86 +10,92 @@ class LikeTwitter < Sinatra::Base
   PORT = '6379'
     
   #login
-  get '/login_form' do
+  get '/' do
     haml :loginform
   end
   
-  post '/login_action' do
-    @userName = params[:name]
-    @password = params[:pass]
+  post '/login' do
+    userName = params[:name]
+    password = params[:pass]
     
     #DBのハッシュと比較的な
     
     redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
-    userId = redis.get("UserName:#{@userName}:UserID")
-    pass = redis.get("UserID:#{userId.to_s}:Password")
+    userId = redis.get("name:#{userName}:uid")
+    dbPass = redis.get("uid:#{userId.to_s}:pass")
     
-    if pass == @password
+    if dbPass == password
       rand = (("a".."z").to_a + ("A".."Z").to_a + (0..9).to_a).shuffle[0..7].join
-      redis.set("UserID:#{userId.to_s}:Cookie", rand)
+      redis.set("uid:#{userId.to_s}:auth", rand)
       response.set_cookie "auth", rand
       
-      redirect to "/home?name=#{@userName}"
+      redirect to "/home?name=#{userName}"
     else
-      redirect to "/login_form"
+      redirect to "/"
     end
   end
 
   #regist
-  get '/user_regist' do
+  get '/registform' do
     haml :registuserform
   end
   
-  post '/user_regist_action' do
-    @userName = params[:name]
-    @password = params[:pass]
+  post '/userregist' do
+    userName = params[:name]
+    password = params[:pass]
     
-    #DBへハッシュを
     redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
-    userId = redis.incr("global:NextUserID")
-    redis.set("UserID:#{userId.to_s}:UserName", @userName)
-    redis.set("UserID:#{userId.to_s}:Password", @password)
-    redis.set("UserName:#{@userName}:UserID", userId)
-    
-    redirect to '/login_form'
+
+    if redis.exists "name:#{userName}:uid"
+      haml :already_user_exist
+    else
+      userId = redis.incr("global:NextUserID")
+      redis.set("uid:#{userId.to_s}:name", userName)
+      redis.set("uid:#{userId.to_s}:pass", password)
+      redis.set("name:#{userName}:uid", userId)
+      
+      redirect to '/'
+    end
   end
   
   #ホーム画面
   get '/home' do
     cookie = request.cookies['auth']
     
-    @userName = params[:name]
+    userName = params[:name]
     
     redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
-    userId = redis.get("UserName:#{@userName}:UserID")
-    redCookie = redis.get("UserID:#{userId.to_s}:Cookie")
+    userId = redis.get("name:#{userName}:uid")
+    redCookie = redis.get("uid:#{userId.to_s}:auth")
     
     if cookie != redCookie
-      redirect to "/login_form"
+      redirect to "/"
+    else
+      @userName = userName
+      @twi = redis.lrange("uid:#{userId.to_s}:timeline", 0, -1)
+      
+      haml :index
     end
-
-    @twi = redis.lrange("Posts:#{userId.to_s}", 0, -1)
-    
-    haml :index
   end
     
   #ツイートポスト
   post '/tweet' do
-    #DBへ
-    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
-    @userName = params[:userName]
-    userId = redis.get("UserName:#{@userName}:UserID")
-    redis.lpush("Posts:#{userId.to_s}", params[:tweet])
+    userName = params[:userName]
     
-    redirect to "/home?name=#{@userName}"
+    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+
+    userId = redis.get("name:#{userName}:uid")
+    redis.lpush("uid:#{userId.to_s}:timeline", Time.now.to_s + "|" + params[:tweet])
+    
+    redirect to "/home?name=#{userName}"
   end
   
-    get '/logout_action' do
-        redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
-        rand = (("a".."z").to_a + ("A".."Z").to_a + (0..9).to_a).shuffle[0..7].join
-        response.set_cookie "auth", rand
-        
-        redirect to "/login_form"
-    end
+  get '/logout' do
+    redis = Redis.new(:host => LOCAL_HOST, :port => PORT)
+    rand = (("a".."z").to_a + ("A".."Z").to_a + (0..9).to_a).shuffle[0..7].join
+    response.set_cookie "auth", rand
+    
+    redirect to "/"
+  end
     
 end

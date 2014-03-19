@@ -6,16 +6,13 @@
   %input{:type => "hidden", :value => "#{@userName}", :name => "userName"}
 
 %table{:class => "table"}
-  %thead
-    %tr
-      %th
   %tboby
     - @twi.each do |text|
       %tr
         %td #{text}
 
 %div{:align => "right"}
-  %a{:href => "/logout_action"}
+  %a{:href => "/logout"}
     logout
   %p
     ver 1.2

@@ -1,4 +1,10 @@
-%form{:class => "well form-inline", :method => "post", :action => "/login_action"}
+%p
+  login
+
+%form{:class => "well form-inline", :method => "post", :action => "/login"}
   %input{:type => "text", :class => "input-small", :name => "name", :placeholder => "ID"}
   %input{:type => "text", :class => "input-small", :name => "pass", :placeholder => "Password"}
   %input{:type => "submit", :value => "login"}
+
+%a{:href => "/registform"}
+  regist
